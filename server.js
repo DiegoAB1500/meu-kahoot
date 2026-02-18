@@ -147,6 +147,20 @@ app.prepare().then(() => {
             nextQuestion();
         });
 
+        socket.on('getGameState', () => {
+            const currentQuestion = gameState.currentQuestionIndex >= 0 ? { ...gameState.questions[gameState.currentQuestionIndex] } : null;
+            if (currentQuestion) delete currentQuestion.correctIndex;
+
+            socket.emit('gameStateUpdate', {
+                status: gameState.status,
+                currentQuestion: currentQuestion,
+                currentQuestionIndex: gameState.currentQuestionIndex,
+                players: gameState.players.map(p => ({ name: p.name, score: p.score })),
+                answersCount: gameState.answersCount,
+                pin: gameState.pin
+            });
+        });
+
         socket.on('disconnect', () => {
             gameState.players = gameState.players.filter(p => p.id !== socket.id);
             io.emit('playerJoined', gameState.players);

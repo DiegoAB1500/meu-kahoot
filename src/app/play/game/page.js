@@ -39,6 +39,16 @@ export default function PlayerGame() {
             socket.on('finalRanking', () => {
                 router.push('/play/final');
             });
+
+            socket.on('gameStateUpdate', (data) => {
+                if (data.currentQuestion) {
+                    setQuestion(data.currentQuestion);
+                    if (data.status === 'PLAYING') setStatus('ANSWERING');
+                    if (data.status === 'RESULTS') setStatus('FEEDBACK');
+                }
+            });
+
+            socket.emit('getGameState');
         }
 
         return () => {
@@ -47,6 +57,7 @@ export default function PlayerGame() {
                 socket.off('answerFeedback');
                 socket.off('questionResults');
                 socket.off('finalRanking');
+                socket.off('gameStateUpdate');
             }
         };
     }, [socket, status, router]);

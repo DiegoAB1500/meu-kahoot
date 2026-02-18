@@ -38,6 +38,18 @@ export default function HostGame() {
                 setFinalRanking(data.ranking);
                 setPhase('FINAL');
             });
+
+            socket.on('gameStateUpdate', (data) => {
+                if (data.currentQuestion) {
+                    setQuestion(data.currentQuestion);
+                    setAnswersCount(data.answersCount);
+                    if (data.status === 'PLAYING') setPhase('QUESTION');
+                    if (data.status === 'RESULTS') setPhase('RESULTS');
+                    if (data.status === 'FINAL_RANKING') setPhase('FINAL');
+                }
+            });
+
+            socket.emit('getGameState');
         }
 
         return () => {
@@ -46,6 +58,7 @@ export default function HostGame() {
                 socket.off('answersUpdate');
                 socket.off('questionResults');
                 socket.off('finalRanking');
+                socket.off('gameStateUpdate');
             }
         };
     }, [socket]);
